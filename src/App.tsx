@@ -288,8 +288,9 @@ export default function App() {
   }, [])
 
   const detectFrame = useCallback(async () => {
+    const model = modelRef.current
     if (
-      (!USE_SERVER_DETECTION && !modelRef.current) ||
+      (!USE_SERVER_DETECTION && !model) ||
       !videoRef.current ||
       !canvasRef.current ||
       inFlightRef.current
@@ -302,9 +303,12 @@ export default function App() {
     }
     inFlightRef.current = true
     try {
-      const predictions = USE_SERVER_DETECTION
-        ? await fetchServerDetections()
-        : await modelRef.current.detect(video, DETECT_MAX_BOXES, DETECT_MIN_SCORE)
+      let predictions: any[] = []
+      if (USE_SERVER_DETECTION) {
+        predictions = await fetchServerDetections()
+      } else if (model) {
+        predictions = await model.detect(video, DETECT_MAX_BOXES, DETECT_MIN_SCORE)
+      }
 
       const normalized: Detection[] = predictions.map((prediction: any) => ({
         class: prediction.class,
