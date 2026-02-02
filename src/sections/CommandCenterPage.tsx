@@ -99,9 +99,7 @@ export default function CommandCenterPage({
                   id: 'G-080Y',
                   name: 'GHOSTLY FURY',
                   status: 'active',
-                  source: encodeURI(
-                    '/videos/1878 - Charleston, IL_Managers Office_10-24-2025 09-30-48_116.avi'
-                  ),
+                  source: encodeURI('/videos/Screenshot 2026-02-02 011440.png'),                  ),
                   dotClass: 'bg-red-500',
                   disabled: true
                 },
