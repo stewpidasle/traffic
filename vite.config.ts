@@ -67,6 +67,17 @@ const wetmetProxy = () => ({
 })
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          tfjs: ['@tensorflow/tfjs', '@tensorflow-models/coco-ssd'],
+          hls: ['hls.js'],
+          ui: ['lucide-react', 'class-variance-authority', '@radix-ui/react-slot', '@radix-ui/react-progress']
+        }
+      }
+    }
+  },
   plugins: [
     wetmetProxy(),
     tailwindcss(),
