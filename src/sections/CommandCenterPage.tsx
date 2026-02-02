@@ -109,9 +109,7 @@ export default function CommandCenterPage({
                   id: 'G-081Z',
                   name: 'CURSED REVENANT',
                   status: 'compromised',
-                  source: encodeURI(
-                    '/videos/1878 - Charleston, IL_Sales Area 360_09-13-2025 22-05-02_569 (1).mp4'
-                  ),
+                  source: null,
                   dotClass: 'bg-green-500',
                   disabled: false
                 }
