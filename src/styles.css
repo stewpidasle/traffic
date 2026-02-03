@@ -105,11 +105,11 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
   aspect-ratio: 16 / 9;
   scrollbar-width: none;
-  --stream-crop-top: 100px;
+  --stream-crop-top: 105px;
   --stream-crop-bottom: 50px;
   --stream-container-crop-bottom: 50px;
   --stream-container-crop-x: 10px;
-  --stream-shift-x: 10px;
+  --stream-shift-x: -5px;
   --stream-shift-y: 50px;
   clip-path: inset(0 var(--stream-container-crop-x) var(--stream-container-crop-bottom)
       var(--stream-container-crop-x) round 20px);
