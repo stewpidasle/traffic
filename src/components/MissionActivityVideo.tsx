@@ -18,6 +18,8 @@ type Track = {
 }
 
 const streamFrameUrl = '/api/wetmet/frame'
+const directFrameUrl =
+  'https://api.wetmet.net/widgets/stream/frame.php?uid=73078bd38a6f267f388473b67316baab'
 const DETECT_MAX_BOXES = 50
 const DETECT_MIN_SCORE = 0.35
 const CAR_MIN_SCORE = 0.45
@@ -97,6 +99,7 @@ export default function MissionActivityVideo({
   const [streamSrc, setStreamSrc] = useState<string | null>(null)
   const [streamError, setStreamError] = useState<string | null>(null)
   const [debugEnabled, setDebugEnabled] = useState(false)
+  const [useIframeFallback, setUseIframeFallback] = useState(false)
   const modelRef = useRef<cocoSsd.ObjectDetection | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -151,6 +154,7 @@ export default function MissionActivityVideo({
       setStreamSrc(videoSource)
       setStreamStatus(isImageSource(videoSource) ? 'Image' : 'File ready')
       setStreamError(null)
+      setUseIframeFallback(false)
       return
     }
 
@@ -169,11 +173,13 @@ export default function MissionActivityVideo({
           setStreamSrc(`/api/wetmet/proxy?url=${encodeURIComponent(url)}`)
           setStreamStatus('Stream ready')
           setStreamError(null)
+          setUseIframeFallback(false)
         }
       } catch {
         if (!cancelled) {
           setStreamStatus('Stream unavailable')
           setStreamError('Failed to fetch stream frame')
+          setUseIframeFallback(true)
         }
       }
     }
@@ -189,7 +195,7 @@ export default function MissionActivityVideo({
 
   useEffect(() => {
     const video = videoRef.current
-    if (!video || !streamSrc || isImageSource(streamSrc)) return
+    if (!video || !streamSrc || isImageSource(streamSrc) || useIframeFallback) return
 
     const handlePlaying = () => setStreamStatus('Live')
     const handleWaiting = () => setStreamStatus('Buffering')
@@ -236,6 +242,27 @@ export default function MissionActivityVideo({
       }
     }
   }, [streamSrc])
+
+  useEffect(() => {
+    if (!streamSrc || isImageSource(streamSrc) || useIframeFallback) return
+    let cancelled = false
+    const verify = async () => {
+      try {
+        const response = await fetch(streamSrc, { method: 'HEAD' })
+        if (!cancelled && response.status === 403) {
+          setStreamStatus('Stream blocked')
+          setStreamError('Upstream blocked proxy access')
+          setUseIframeFallback(true)
+        }
+      } catch {
+        // ignore
+      }
+    }
+    verify()
+    return () => {
+      cancelled = true
+    }
+  }, [streamSrc, useIframeFallback])
 
   const drawDetections = useCallback((predictions: Detection[]) => {
     if (!videoRef.current || !canvasRef.current) return
@@ -507,10 +534,20 @@ export default function MissionActivityVideo({
           <div className="font-mono">streamStatus: {streamStatus}</div>
           <div className="font-mono">streamSrc: {streamSrc ?? 'null'}</div>
           <div className="font-mono">error: {streamError ?? 'none'}</div>
+          <div className="font-mono">
+            iframeFallback: {useIframeFallback ? 'true' : 'false'}
+          </div>
         </div>
       )}
       <div className="stream-frame">
-        {streamSrc && isImageSource(streamSrc) ? (
+        {useIframeFallback ? (
+          <iframe
+            title="Traffic Stream"
+            src={directFrameUrl}
+            className="h-full w-full"
+            allow="autoplay; fullscreen"
+          />
+        ) : streamSrc && isImageSource(streamSrc) ? (
           <img src={streamSrc} alt="Camera still" />
         ) : (
           <>
