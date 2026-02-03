@@ -95,6 +95,8 @@ export default function MissionActivityVideo({
     return loadStartedAt()
   })
   const [streamSrc, setStreamSrc] = useState<string | null>(null)
+  const [streamError, setStreamError] = useState<string | null>(null)
+  const [debugEnabled, setDebugEnabled] = useState(false)
   const modelRef = useRef<cocoSsd.ObjectDetection | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -139,9 +141,16 @@ export default function MissionActivityVideo({
   }, [])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    setDebugEnabled(params.get('debug') === '1')
+  }, [])
+
+  useEffect(() => {
     if (videoSource) {
       setStreamSrc(videoSource)
       setStreamStatus(isImageSource(videoSource) ? 'Image' : 'File ready')
+      setStreamError(null)
       return
     }
 
@@ -159,10 +168,12 @@ export default function MissionActivityVideo({
         if (!cancelled) {
           setStreamSrc(`/api/wetmet/proxy?url=${encodeURIComponent(url)}`)
           setStreamStatus('Stream ready')
+          setStreamError(null)
         }
       } catch {
         if (!cancelled) {
           setStreamStatus('Stream unavailable')
+          setStreamError('Failed to fetch stream frame')
         }
       }
     }
@@ -182,7 +193,10 @@ export default function MissionActivityVideo({
 
     const handlePlaying = () => setStreamStatus('Live')
     const handleWaiting = () => setStreamStatus('Buffering')
-    const handleError = () => setStreamStatus('Playback error')
+    const handleError = () => {
+      setStreamStatus('Playback error')
+      setStreamError('Video playback error')
+    }
 
     video.addEventListener('playing', handlePlaying)
     video.addEventListener('waiting', handleWaiting)
@@ -202,6 +216,7 @@ export default function MissionActivityVideo({
       })
       hls.on(Hls.Events.ERROR, () => {
         setStreamStatus('Playback error')
+        setStreamError('HLS playback error')
       })
     } else if (isHls && video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = streamSrc
@@ -486,6 +501,14 @@ export default function MissionActivityVideo({
 
   return (
     <div className="space-y-4">
+      {debugEnabled && (
+        <div className="rounded border border-yellow-500/60 bg-yellow-500/10 p-3 text-xs text-yellow-100">
+          <div className="font-mono">debug=1</div>
+          <div className="font-mono">streamStatus: {streamStatus}</div>
+          <div className="font-mono">streamSrc: {streamSrc ?? 'null'}</div>
+          <div className="font-mono">error: {streamError ?? 'none'}</div>
+        </div>
+      )}
       <div className="stream-frame">
         {streamSrc && isImageSource(streamSrc) ? (
           <img src={streamSrc} alt="Camera still" />
