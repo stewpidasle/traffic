@@ -1,8 +1,20 @@
 export default async function handler(_req: any, res: any) {
   try {
     const response = await fetch(
-      'https://api.wetmet.net/widgets/stream/frame.php?uid=73078bd38a6f267f388473b67316baab'
+      'https://api.wetmet.net/widgets/stream/frame.php?uid=73078bd38a6f267f388473b67316baab',
+      {
+        headers: {
+          'user-agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          referer: 'https://wetmet.net/'
+        }
+      }
     )
+    if (!response.ok) {
+      res.statusCode = response.status
+      res.end(`Upstream error: ${response.status}`)
+      return
+    }
     const body = await response.text()
     res.statusCode = 200
     res.setHeader('content-type', 'text/html; charset=utf-8')
