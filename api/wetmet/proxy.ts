@@ -24,13 +24,33 @@ export default async function handler(req: any, res: any) {
       return
     }
 
-    const response = await fetch(target, {
-      headers: {
-        'user-agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        referer: 'https://wetmet.net/'
-      }
+    const baseHeaders = {
+      'user-agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      accept: '*/*',
+      'accept-language': 'en-US,en;q=0.9',
+      referer: 'https://wetmet.net/',
+      origin: 'https://wetmet.net'
+    } as const
+
+    let response = await fetch(target, {
+      headers: baseHeaders,
+      redirect: 'follow',
+      cache: 'no-store'
     })
+
+    if (response.status === 403 && target.includes('wetmet.net')) {
+      response = await fetch(target, {
+        headers: {
+          ...baseHeaders,
+          referer:
+            'https://api.wetmet.net/widgets/stream/frame.php?uid=73078bd38a6f267f388473b67316baab',
+          origin: 'https://api.wetmet.net'
+        },
+        redirect: 'follow',
+        cache: 'no-store'
+      })
+    }
     const contentType = response.headers.get('content-type') ?? ''
     const isPlaylist =
       contentType.includes('application/vnd.apple.mpegurl') || target.endsWith('.m3u8')
@@ -56,6 +76,7 @@ export default async function handler(req: any, res: any) {
 
     const buffer = Buffer.from(await response.arrayBuffer())
     res.statusCode = response.status
+    res.setHeader('x-proxy-upstream-status', String(response.status))
     if (contentType) {
       res.setHeader('content-type', contentType)
     }
