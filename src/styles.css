@@ -109,6 +109,8 @@
   --stream-crop-bottom: 50px;
   --stream-container-crop-bottom: 50px;
   --stream-container-crop-x: 10px;
+  --stream-shift-x: 10px;
+  --stream-shift-y: -100px;
   clip-path: inset(0 var(--stream-container-crop-x) var(--stream-container-crop-bottom)
       var(--stream-container-crop-x) round 20px);
   margin-bottom: calc(-1 * var(--stream-container-crop-bottom));
@@ -120,7 +122,9 @@
 }
 
 .stream-frame video,
-.stream-frame canvas {
+.stream-frame canvas,
+.stream-frame iframe,
+.stream-frame img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -128,7 +132,10 @@
   object-fit: cover;
   display: block;
   height: calc(100% + var(--stream-crop-top) + var(--stream-crop-bottom));
-  transform: translateY(calc(-1 * var(--stream-crop-top)));
+  transform: translate(
+    var(--stream-shift-x),
+    calc(-1 * var(--stream-crop-top) + var(--stream-shift-y))
+  );
 }
 
 .stream-frame canvas {
