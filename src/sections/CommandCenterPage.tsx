@@ -13,9 +13,30 @@ export default function CommandCenterPage({
   onResetAgeChange,
   streamStatus
 }: CommandCenterPageProps) {
+  const agents = [
+    {
+      id: 'G-081Z',
+      name: 'CURSED REVENANT',
+      status: 'compromised',
+      source: null,
+      dotClass: 'bg-green-500',
+      disabled: false
+    },
+    {
+      id: 'G-079X',
+      name: 'OBSIDIAN SENTINEL',
+      status: 'standby',
+      source: encodeURI('/videos/Screenshot 2026-02-02 011440.png'),
+      dotClass: 'bg-red-500',
+      disabled: false
+    }
+  ]
   const [carCount, setCarCount] = useState(0)
   const [totalCars, setTotalCars] = useState(0)
-  const [videoSource, setVideoSource] = useState<string | null>(null)
+  const [videoSource, setVideoSource] = useState<string | null>(() => {
+    const lastAgent = agents[agents.length - 1]
+    return lastAgent?.source ?? null
+  })
   const [latencyMs, setLatencyMs] = useState<number | null>(null)
 
   useEffect(() => {
@@ -70,48 +91,7 @@ export default function CommandCenterPage({
             </div>
 
             <div className="space-y-2">
-              {[
-                {
-                  id: 'G-078W',
-                  name: 'VENGEFUL SPIRIT',
-                  status: 'active',
-                  source: 'wetmet-iframe',
-                  dotClass:
-                    streamStatus === 'Live'
-                      ? 'bg-green-500'
-                      : streamStatus === 'Buffering'
-                        ? 'bg-yellow-400'
-                        : streamStatus === 'Playback error' ||
-                            streamStatus === 'Stream unavailable'
-                          ? 'bg-red-500'
-                          : 'bg-white',
-                  disabled: false
-                },
-                {
-                  id: 'G-079X',
-                  name: 'OBSIDIAN SENTINEL',
-                  status: 'standby',
-                  source: encodeURI('/videos/Screenshot 2026-02-02 011440.png'),
-                  dotClass: 'bg-red-500',
-                  disabled: false
-                },
-                {
-                  id: 'G-080Y',
-                  name: 'GHOSTLY FURY',
-                  status: 'active',
-                  source: encodeURI('/videos/Screenshot 2026-02-02 011440.png'),
-                  dotClass: 'bg-red-500',
-                  disabled: true,
-                },
-                {
-                  id: 'G-081Z',
-                  name: 'CURSED REVENANT',
-                  status: 'compromised',
-                  source: null,
-                  dotClass: 'bg-green-500',
-                  disabled: false
-                }
-              ].map((agent) => (
+              {agents.map((agent) => (
                 <button
                   key={agent.id}
                   onClick={() => setVideoSource(agent.source)}
@@ -196,7 +176,7 @@ export default function CommandCenterPage({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 max-h-80 overflow-y-auto">
+            <div className="space-y-3 max-h-80 overflow-y-auto scrollbar-none">
               {[
                 {
                   time: '25/06/2025 09:29',
