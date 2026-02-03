@@ -42,7 +42,7 @@ export default function App() {
   return (
     <div className="flex h-screen">
       <div
-        className={`${sidebarCollapsed ? 'w-16' : 'w-70'} bg-neutral-900 border-r border-neutral-700 transition-all duration-300 fixed md:relative z-50 md:z-auto h-full md:h-auto ${!sidebarCollapsed ? 'md:block' : ''}`}
+        className={`${sidebarCollapsed ? 'w-16' : 'w-[280px]'} bg-neutral-900 border-r border-neutral-700 transition-all duration-300 fixed z-50 h-full`}
       >
         <div className="p-4">
           <div className="flex items-center justify-between mb-8">
@@ -125,7 +125,11 @@ export default function App() {
         <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setSidebarCollapsed(true)} />
       )}
 
-      <div className={`flex-1 flex flex-col ${!sidebarCollapsed ? 'md:ml-0' : ''}`}>
+      <div
+        className={`flex-1 flex flex-col ${
+          sidebarCollapsed ? 'md:pl-16' : 'md:pl-[280px]'
+        }`}
+      >
         <div className="h-16 bg-neutral-800 border-b border-neutral-700 flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
             <div className="text-sm text-neutral-400">

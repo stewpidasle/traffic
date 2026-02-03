@@ -105,9 +105,9 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
   aspect-ratio: 16 / 9;
   scrollbar-width: none;
-  --stream-crop-top: 109px;
-  --stream-crop-bottom: 54px;
-  --stream-container-crop-bottom: 54px;
+  --stream-crop-top: 112px;
+  --stream-crop-bottom: 57px;
+  --stream-container-crop-bottom: 57px;
   --stream-container-crop-left: 10px;
   --stream-container-crop-right: 14px;
   --stream-shift-x: -5px;
