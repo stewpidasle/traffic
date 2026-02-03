@@ -20,6 +20,7 @@ type Track = {
 const streamFrameUrl = '/api/wetmet/frame'
 const directFrameUrl =
   'https://api.wetmet.net/widgets/stream/frame.php?uid=73078bd38a6f267f388473b67316baab'
+const iframeSourceId = 'wetmet-iframe'
 const DETECT_MAX_BOXES = 50
 const DETECT_MIN_SCORE = 0.35
 const CAR_MIN_SCORE = 0.45
@@ -151,6 +152,13 @@ export default function MissionActivityVideo({
 
   useEffect(() => {
     if (videoSource) {
+      if (videoSource === iframeSourceId) {
+        setStreamSrc(null)
+        setStreamStatus('Embedded')
+        setStreamError(null)
+        setUseIframeFallback(true)
+        return
+      }
       setStreamSrc(videoSource)
       setStreamStatus(isImageSource(videoSource) ? 'Image' : 'File ready')
       setStreamError(null)

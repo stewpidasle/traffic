@@ -75,7 +75,7 @@ export default function CommandCenterPage({
                   id: 'G-078W',
                   name: 'VENGEFUL SPIRIT',
                   status: 'active',
-                  source: null,
+                  source: 'wetmet-iframe',
                   dotClass:
                     streamStatus === 'Live'
                       ? 'bg-green-500'
