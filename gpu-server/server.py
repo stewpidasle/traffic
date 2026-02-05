@@ -1,15 +1,35 @@
 import os
+import time
 
 import cv2
 import numpy as np
 from fastapi import FastAPI, File, Header, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from aiohttp import ClientSession
+from pytile import async_login
+from dotenv import load_dotenv
 from ultralytics import YOLO
+
+load_dotenv()
 
 MODEL_PATH = os.getenv("YOLO_MODEL", "yolov8l.pt")
 API_KEY = os.getenv("GPU_DETECT_TOKEN")
+TILE_EMAIL = os.getenv("TILE_EMAIL")
+TILE_PASSWORD = os.getenv("TILE_PASSWORD")
+TILE_CLIENT_UUID = os.getenv("TILE_CLIENT_UUID")
+TILE_CACHE_SECONDS = int(os.getenv("TILE_CACHE_SECONDS", "30"))
+CORS_ALLOW_ORIGINS = os.getenv("CORS_ALLOW_ORIGINS", "*")
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[origin.strip() for origin in CORS_ALLOW_ORIGINS.split(",")],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 model = YOLO(MODEL_PATH)
+_tile_cache: dict[str, object] = {"ts": 0.0, "data": []}
 
 
 @app.post("/detect")
@@ -48,6 +68,43 @@ async def detect(
         "width": int(image.shape[1]),
         "height": int(image.shape[0]),
     }
+
+
+@app.get("/devices")
+async def devices():
+    if not TILE_EMAIL or not TILE_PASSWORD:
+        raise HTTPException(status_code=500, detail="Tile credentials not configured")
+
+    now = time.time()
+    if now - float(_tile_cache["ts"]) < TILE_CACHE_SECONDS:
+        return {"devices": _tile_cache["data"], "cached": True}
+
+    async with ClientSession() as session:
+        api = await async_login(
+            TILE_EMAIL, TILE_PASSWORD, session, client_uuid=TILE_CLIENT_UUID
+        )
+        tiles = await api.async_get_tiles()
+        devices = []
+        for tile in tiles.values():
+            devices.append(
+                {
+                    "uuid": tile.uuid,
+                    "name": tile.name,
+                    "lat": tile.latitude,
+                    "lon": tile.longitude,
+                    "accuracy": tile.accuracy,
+                    "altitude": tile.altitude,
+                    "last_timestamp": tile.last_timestamp,
+                    "kind": tile.kind,
+                    "dead": tile.dead,
+                    "lost": tile.lost,
+                    "visible": tile.visible,
+                }
+            )
+
+    _tile_cache["ts"] = now
+    _tile_cache["data"] = devices
+    return {"devices": devices, "cached": False}
 
 
 if __name__ == "__main__":

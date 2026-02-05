@@ -152,7 +152,6 @@ export default function App() {
             <CommandCenterPage
               onStatusChange={setStreamStatus}
               onResetAgeChange={setTotalCarsStartedAt}
-              streamStatus={streamStatus}
             />
           )}
           {activeSection === 'agents' && <AgentNetworkPage />}
