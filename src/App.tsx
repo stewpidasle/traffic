@@ -6,6 +6,7 @@ import AgentNetworkPage from './sections/AgentNetworkPage'
 import OperationsPage from './sections/OperationsPage'
 import IntelligencePage from './sections/IntelligencePage'
 import SystemsPage from './sections/SystemsPage'
+import IconsPage from './sections/icons'
 
 export default function App() {
   const [activeSection, setActiveSection] = useState('overview')
@@ -13,6 +14,7 @@ export default function App() {
   const [streamStatus, setStreamStatus] = useState('Connecting')
   const [totalCarsStartedAt, setTotalCarsStartedAt] = useState(() => Date.now())
   const [now, setNow] = useState(() => new Date())
+  const [commandMode, setCommandMode] = useState<'overview' | 'overwatch'>('overview')
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000)
@@ -65,10 +67,11 @@ export default function App() {
           <nav className="space-y-2">
             {[
               { id: 'overview', icon: Monitor, label: 'COMMAND CENTER' },
-              { id: 'agents', icon: Users, label: 'CONTACTS' },
               { id: 'operations', icon: Target, label: 'OPERATIONS' },
               { id: 'intelligence', icon: Shield, label: 'INTELLIGENCE' },
-              { id: 'systems', icon: Settings, label: 'SYSTEMS' }
+              { id: 'agents', icon: Users, label: 'CONTACTS' },
+              { id: 'systems', icon: Settings, label: 'SYSTEMS' },
+              { id: 'icons', icon: Monitor, label: 'ICONS' }
             ].map((item) => (
               <button
                 key={item.id}
@@ -132,8 +135,29 @@ export default function App() {
       >
         <div className="h-16 bg-neutral-800 border-b border-neutral-700 flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
-            <div className="text-sm text-neutral-400">
-              TACTICAL COMMAND / <span className="text-blue-500">OVERVIEW</span>
+            <div className="inline-flex rounded-full border border-neutral-700 bg-neutral-900 p-1 text-xs">
+              <button
+                type="button"
+                onClick={() => setCommandMode('overview')}
+                className={`rounded-full px-3 py-1 transition-colors ${
+                  commandMode === 'overview'
+                    ? 'bg-blue-500 text-white'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                OVERVIEW
+              </button>
+              <button
+                type="button"
+                onClick={() => setCommandMode('overwatch')}
+                className={`rounded-full px-3 py-1 transition-colors ${
+                  commandMode === 'overwatch'
+                    ? 'bg-blue-500 text-white'
+                    : 'text-neutral-400 hover:text-white'
+                }`}
+              >
+                OVERWATCH
+              </button>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -152,15 +176,16 @@ export default function App() {
             <CommandCenterPage
               onStatusChange={setStreamStatus}
               onResetAgeChange={setTotalCarsStartedAt}
+              viewMode={commandMode}
             />
           )}
           {activeSection === 'agents' && <AgentNetworkPage />}
           {activeSection === 'operations' && <OperationsPage />}
           {activeSection === 'intelligence' && <IntelligencePage />}
           {activeSection === 'systems' && <SystemsPage />}
+          {activeSection === 'icons' && <IconsPage />}
         </div>
       </div>
     </div>
   )
 }
-

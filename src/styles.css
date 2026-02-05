@@ -225,8 +225,15 @@
   transform: none;
 }
 
+.stream-frame video,
+.stream-frame iframe,
+.stream-frame img {
+  z-index: 1;
+}
+
 .stream-frame canvas {
   pointer-events: none;
+  z-index: 2;
 }
 
 .radar-dot-pos-1 {
