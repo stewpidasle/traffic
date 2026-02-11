@@ -18,14 +18,15 @@ type Track = {
 }
 
 const streamFrameUrl = '/api/wetmet/frame'
-const directFrameUrl =
-  'https://api.wetmet.net/widgets/stream/frame.php?uid=73078bd38a6f267f388473b67316baab'
+const directFrameUrl = 'https://api.wetmet.net/widgets/stream/frame.php?uid=73078bd38a6f267f388473b67316baab'
 const iframeSourceId = 'wetmet-iframe'
 const DETECT_MAX_BOXES = 50
 const DETECT_MIN_SCORE = 0.35
 const CAR_MIN_SCORE = 0.45
 const CAR_MIN_AREA_RATIO = 0.002
-const USE_SERVER_DETECTION = import.meta.env.VITE_USE_SERVER_DETECTION === 'true'
+const FORCE_LOCAL_DETECTION = import.meta.env.VITE_FORCE_OBJECT_DETECTION !== 'false'
+const USE_SERVER_DETECTION =
+  !FORCE_LOCAL_DETECTION && import.meta.env.VITE_USE_SERVER_DETECTION === 'true'
 const SERVER_DETECT_ENDPOINT = '/api/detect'
 const SERVER_DETECT_TIMEOUT_MS = 8000
 const DETECTION_INTERVAL_MS = USE_SERVER_DETECTION ? 1000 : 200
@@ -567,4 +568,3 @@ export default function MissionActivityVideo({
     </div>
   )
 }
-
