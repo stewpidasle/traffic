@@ -14,7 +14,6 @@ export default function App() {
   const [streamStatus, setStreamStatus] = useState('Connecting')
   const [totalCarsStartedAt, setTotalCarsStartedAt] = useState(() => Date.now())
   const [now, setNow] = useState(() => new Date())
-  const [commandMode, setCommandMode] = useState<'overview' | 'overwatch'>('overview')
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000)
@@ -135,30 +134,13 @@ export default function App() {
       >
         <div className="h-16 bg-neutral-800 border-b border-neutral-700 flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
-            <div className="inline-flex rounded-full border border-neutral-700 bg-neutral-900 p-1 text-xs">
-              <button
-                type="button"
-                onClick={() => setCommandMode('overview')}
-                className={`rounded-full px-3 py-1 transition-colors ${
-                  commandMode === 'overview'
-                    ? 'bg-blue-500 text-white'
-                    : 'text-neutral-400 hover:text-white'
-                }`}
-              >
-                OVERVIEW
-              </button>
-              <button
-                type="button"
-                onClick={() => setCommandMode('overwatch')}
-                className={`rounded-full px-3 py-1 transition-colors ${
-                  commandMode === 'overwatch'
-                    ? 'bg-blue-500 text-white'
-                    : 'text-neutral-400 hover:text-white'
-                }`}
-              >
-                OVERWATCH
-              </button>
-            </div>
+            <Button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event('pytile:refresh'))}
+              className="bg-blue-500 hover:bg-blue-600 text-white text-xs"
+            >
+              Refresh Locations
+            </Button>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-xs text-neutral-500">LAST UPDATE: {formattedNow}</div>
@@ -176,7 +158,6 @@ export default function App() {
             <CommandCenterPage
               onStatusChange={setStreamStatus}
               onResetAgeChange={setTotalCarsStartedAt}
-              viewMode={commandMode}
             />
           )}
           {activeSection === 'agents' && <AgentNetworkPage />}

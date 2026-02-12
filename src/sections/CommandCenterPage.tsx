@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Cctv } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import MissionActivityVideo from '../components/MissionActivityVideo'
@@ -14,13 +14,11 @@ declare const google: any
 type CommandCenterPageProps = {
   onStatusChange?: (status: string) => void
   onResetAgeChange?: (startedAt: number) => void
-  viewMode?: 'overview' | 'overwatch'
 }
 
 export default function CommandCenterPage({
   onStatusChange,
-  onResetAgeChange,
-  viewMode = 'overview'
+  onResetAgeChange
 }: CommandCenterPageProps) {
   const agents = [
     {
@@ -106,7 +104,6 @@ export default function CommandCenterPage({
   }, [])
 
   useEffect(() => {
-    if (viewMode !== 'overwatch') return
     if (!mapRef.current) return
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
     if (!apiKey) {
@@ -196,9 +193,9 @@ export default function CommandCenterPage({
       script.onload = null
       script.onerror = null
     }
-  }, [devices, mapLocked, viewMode])
+  }, [devices, mapLocked])
 
-  const fetchDevices = async () => {
+  const fetchDevices = useCallback(async () => {
     if (radarDotTimerRef.current) {
       window.clearTimeout(radarDotTimerRef.current)
     }
@@ -236,7 +233,16 @@ export default function CommandCenterPage({
     } catch {
       // ignore fetch errors for now
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handleRefresh = () => {
+      void fetchDevices()
+    }
+    window.addEventListener('pytile:refresh', handleRefresh)
+    return () => window.removeEventListener('pytile:refresh', handleRefresh)
+  }, [fetchDevices])
 
   const flyToDevice = (lat: number, lng: number) => {
     if (!mapInstanceRef.current) {
@@ -274,9 +280,7 @@ export default function CommandCenterPage({
   return (
     <div className="p-6 space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {viewMode === 'overview' && (
-          <>
-            <Card className="lg:col-span-8 bg-neutral-900 border-neutral-700">
+        <Card className="lg:col-span-8 bg-neutral-900 border-neutral-700">
               <CardHeader className="pb-3">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
@@ -310,7 +314,7 @@ export default function CommandCenterPage({
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-white font-mono">
-                        {latencyMs === null ? 'â€”' : latencyMs}
+                        {latencyMs === null ? '--' : latencyMs}
                       </div>
                       <div className="text-xs text-neutral-500">Training</div>
                     </div>
@@ -326,9 +330,9 @@ export default function CommandCenterPage({
                   videoSource={selectedAgentId === agents[1]?.id ? videoSource : null}
                 />
               </CardContent>
-            </Card>
+        </Card>
 
-            <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700">
+        <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
                   ACTIVITY LOG
@@ -393,13 +397,9 @@ export default function CommandCenterPage({
                   ))}
                 </div>
               </CardContent>
-            </Card>
-          </>
-        )}
+        </Card>
 
-        {viewMode === 'overwatch' && (
-          <>
-            <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700">
+        <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
                   ENCRYPTED LOCATION
@@ -467,9 +467,9 @@ export default function CommandCenterPage({
                   </div>
                 </div>
               </CardContent>
-            </Card>
+        </Card>
 
-            <Card className="lg:col-span-8 bg-neutral-900 border-neutral-700">
+        <Card className="lg:col-span-8 bg-neutral-900 border-neutral-700">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
                   MISSION OVERWATCH
@@ -493,9 +493,7 @@ export default function CommandCenterPage({
                   )}
                 </div>
               </CardContent>
-            </Card>
-          </>
-        )}
+        </Card>
 <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
