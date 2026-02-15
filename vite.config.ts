@@ -2,10 +2,48 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { spawn } from 'node:child_process'
+import { resolve } from 'node:path'
 
 const wetmetProxy = () => ({
   name: 'wetmet-proxy',
   configureServer(server: { middlewares: any }) {
+    server.middlewares.use('/api/devices', async (_req: any, res: any) => {
+      const python = process.env.PYTILE_PYTHON ?? process.env.PYTHON ?? 'python'
+      const repoRoot = process.cwd()
+      const scriptPath = resolve(repoRoot, 'backend', 'pytile', 'examples', 'get_locations.py')
+      const cwd = resolve(repoRoot, 'backend', 'pytile')
+
+      const child = spawn(python, [scriptPath], { cwd, env: process.env })
+      let stdout = ''
+      let stderr = ''
+
+      child.stdout.on('data', (chunk) => {
+        stdout += chunk.toString()
+      })
+      child.stderr.on('data', (chunk) => {
+        stderr += chunk.toString()
+      })
+
+      child.on('close', (code) => {
+        if (code !== 0) {
+          res.statusCode = 500
+          res.setHeader('content-type', 'application/json')
+          res.end(
+            JSON.stringify({
+              error: 'pytile failed',
+              detail: stderr || stdout || 'Unknown error'
+            })
+          )
+          return
+        }
+
+        res.statusCode = 200
+        res.setHeader('content-type', 'application/json')
+        res.end(stdout || '{"devices": []}')
+      })
+    })
+
     server.middlewares.use('/api/wetmet/frame', async (_req: any, res: any) => {
       try {
         const response = await fetch(

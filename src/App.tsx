@@ -134,13 +134,24 @@ export default function App() {
       >
         <div className="h-16 bg-neutral-800 border-b border-neutral-700 flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
-            <Button
+            <button
               type="button"
               onClick={() => window.dispatchEvent(new Event('pytile:refresh'))}
-              className="bg-blue-500 hover:bg-blue-600 text-white text-xs"
+              className="relative w-10 h-10 focus:outline-none cursor-pointer"
+              aria-label="Refresh locations"
             >
-              Refresh Locations
-            </Button>
+              <div className="radar-sweep"></div>
+              <div className="radar-glow"></div>
+              <div className="absolute inset-0 border-2 border-white rounded-full opacity-60 animate-pulse"></div>
+              <div className="absolute inset-2 border border-white rounded-full opacity-40"></div>
+              <div className="absolute inset-4 border border-white rounded-full opacity-20"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-full h-px bg-white opacity-30"></div>
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-px h-full bg-white opacity-30"></div>
+              </div>
+            </button>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-xs text-neutral-500">LAST UPDATE: {formattedNow}</div>
